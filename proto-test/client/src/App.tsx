@@ -2,22 +2,33 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
-import { TaskServiceClient } from './proto/tasks_grpc_web_pb';
-import { credentials } from '@grpc/grpc-js';
-import { CallOptions } from 'grpc-web';
+import grpcClient from './grpc-client';
+import { Task, TasksResponse } from './proto/tasks_pb';
+
 function App() {
-  const client = new TaskServiceClient('http://localhost:8000', null, null);
-  const request = new Empty();
-  var stream = client.list(request, null, (err, response) => {
-    if (err) {
-      console.log(err);
-    } else {
-      console.log(response);
-    }
-  });
-  stream.on('data', (response: any) => {
-    console.log(response);
-  });
+  const [tasks, setTasks] = React.useState<Task.AsObject[]>([]);
+
+  React.useEffect(() => {
+    grpcClient.list(new Empty(), {}, (err, response: TasksResponse) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      setTasks(response.toObject().tasksList);
+    });
+    const newTask = new Task();
+    newTask.setId(1);
+    newTask.setTitle('New Task');
+    grpcClient.create(newTask, {}, (err, response: Task) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      console.log(response.toObject());
+    });
+  }, []);
+
+  console.log(tasks);
 
   return (
     <div className='App'>
