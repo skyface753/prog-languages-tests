@@ -26,8 +26,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build:proto": "sh ./scripts/build-protos.sh ./tasks.proto ./src/proto",
-    "build": "npm run build:proto && react-scripts build",
+    "proto:build": "sh ./scripts/build-protos.sh ./tasks.proto ./src/proto",
+    "proto:clear": "rm -rf ./src/proto",
+    "proto": "npm run proto:clear && npm run proto:build",
+    "build": "npm run proto && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

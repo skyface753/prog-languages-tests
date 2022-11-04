@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run build && GRPC_VERBOSITY=DEBUG GRPC_TRACE=all nodemon -e js,ts,tsx src/index.ts",
-    "start": "npm run build && tsc && node dist/index.js",
-    "build": "sh ./scripts/build-protos.sh ./tasks.proto ./src/proto "
+    "dev": "GRPC_VERBOSITY=DEBUG GRPC_TRACE=all nodemon -e js,ts,tsx src/index.ts",
+    "start": "tsc && node dist/index.js",
+    "proto:clear": "rm -rf ./src/proto",
+    "proto:build": "sh ./scripts/build-protos.sh ./tasks.proto ./src/proto ",
+    "proto": "npm run proto:clear && npm run proto:build"
   },
   "author": "",
   "license": "ISC",
