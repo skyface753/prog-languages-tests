@@ -2,6 +2,9 @@ import * as grpc from '@grpc/grpc-js';
 import { handleUnaryCall } from '@grpc/grpc-js';
 // import { ITaskServiceServer, TaskServiceService } from './proto/tasks_grpc_pb';
 import { IAuthServiceServer, AuthServiceService } from './proto/auth_grpc_pb';
+import { ITaskServiceServer, TaskServiceService } from './proto/tasks_grpc_pb';
+import { addReflection } from 'grpc-server-reflection';
+
 // import {
 //   Task,
 //   TaskResponse,
@@ -23,6 +26,15 @@ import {
 import * as timestamp from 'google-protobuf/google/protobuf/timestamp_pb';
 import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
 import db from './db';
+import {
+  CreateTaskRequest,
+  TaskRequest,
+  TasksResponse,
+  UpdateTaskRequest,
+  DeleteTaskRequest,
+  Task,
+  ListTasksRequest,
+} from './proto/tasks_pb';
 
 const accessTokens: { [key: number]: string } = {};
 const refreshTokens: { [key: string]: number } = {};
@@ -137,89 +149,143 @@ class AuthServer implements IAuthServiceServer {
     } else {
       callback(new Error('user not found'), null);
     }
-    // if (accessToken === 'accessToken' && csrfToken === 'csrfToken') {
-    //   const user = new User();
-    //   user.setId(1);
-    //   user.setUsername('username');
-    //   user.setPassword('password');
-    //   callback(null, user);
-    // } else {
-    //   callback(new Error('invalid access token or csrf token'), null);
-    // }
   }
 }
 
-// class TasksServer implements ITaskServiceServer {
-//   update: grpc.handleUnaryCall<Task, TaskResponse>;
-//   read: grpc.handleUnaryCall<TaskRequest, TaskResponse>;
-//   [name: string]: import('@grpc/grpc-js').UntypedHandleCall;
-//   create(
-//     call: grpc.ServerUnaryCall<Task, TaskResponse>,
-//     callback: grpc.sendUnaryData<TaskResponse>
-//   ): void {
-//     const createTaskRequest = call.request;
-//     const dbTasks = db.get('tasks') as any;
-//     createTaskRequest.setId(dbTasks.value().length + 1);
-//     const timestamp1 = new timestamp.Timestamp();
-//     timestamp1.fromDate(new Date());
+class TaskServer implements ITaskServiceServer {
+  // listTasks: grpc.handleUnaryCall<Empty, TasksResponse>;
 
-//     createTaskRequest.setCreatedAt(timestamp1);
-//     createTaskRequest.setUpdatedAt(timestamp1);
-//     dbTasks.push(createTaskRequest.toObject()).write();
+  [name: string]: grpc.UntypedHandleCall;
 
-//     const taskResponse = new TaskResponse();
-//     taskResponse.setTask(createTaskRequest);
-//     callback(null, taskResponse);
-//   }
-//   list(
-//     call: grpc.ServerUnaryCall<Empty, TasksResponse>,
-//     callback: grpc.sendUnaryData<TasksResponse>
-//   ): void {
-//     const tasksResponse = new TasksResponse();
-//     const tasks = db.get('tasks').value();
-//     tasks.map((task: Task.AsObject) => {
-//       const task1 = new Task();
-//       task1.setId(task.id);
-//       task1.setTitle(task.title);
-//       task1.setDescription(task.description);
-//       const createdAt = new timestamp.Timestamp();
-//       createdAt.setSeconds(task.createdAt.seconds);
-//       createdAt.setNanos(task.createdAt.nanos);
-//       task1.setCreatedAt(createdAt);
-//       const updatedAt = new timestamp.Timestamp();
-//       updatedAt.setSeconds(task.updatedAt.seconds);
-//       updatedAt.setNanos(task.updatedAt.nanos);
-//       task1.setUpdatedAt(updatedAt);
-//       tasksResponse.addTasks(task1);
-//     });
-//     callback(null, tasksResponse);
-//   }
-//   //rpc Delete(DeleteTaskRequest) returns (DeleteTaskResponse);
-//   delete(
-//     call: grpc.ServerUnaryCall<DeleteTaskRequest, DeleteTaskResponse>,
-//     callback: grpc.sendUnaryData<DeleteTaskResponse>
-//   ): void {
-//     const deleteTaskRespone = new DeleteTaskResponse();
-//     const deleteTaskRequest = call.request;
-//     const id = deleteTaskRequest.getId();
+  // createTask: grpc.handleUnaryCall<CreateTaskRequest, Task>;
+  createTask(
+    call: grpc.ServerUnaryCall<CreateTaskRequest, Task>,
+    callback: grpc.sendUnaryData<Task>
+  ): void {
+    // Create a Task
+    const { name, description, accessToken } = call.request.toObject();
+    console.log(accessToken);
+    const userId = Object.keys(accessTokens).find(
+      (key) => accessTokens[key] === accessToken
+    );
+    console.log('userId', userId);
+    if (!userId) {
+      callback(new Error('user not found'), null);
+    }
+    const dbTasks = db.get('tasks') as any;
+    const id = (dbTasks.value().length + 1).toString();
+    const timestamp1 = new timestamp.Timestamp();
+    timestamp1.fromDate(new Date());
+    const task = new Task();
+    task.setId(id);
+    task.setName(name);
+    task.setDescription(description);
+    task.setUserfk(parseInt(userId));
+    task.setCreatedAt(timestamp1);
+    task.setUpdatedAt(timestamp1);
+    dbTasks.push(task.toObject()).write();
+    console.log(task.toObject());
+    callback(null, task);
+  }
+  // getTask: grpc.handleUnaryCall<TaskRequest, Task>;
+  getTask(
+    call: grpc.ServerUnaryCall<TaskRequest, Task>,
+    callback: grpc.sendUnaryData<Task>
+  ): void {
+    // Get a Task
+    const { id } = call.request.toObject();
+    const task = db
+      .get('tasks')
+      .value()
+      .find((task: Task.AsObject) => {
+        return task.id === id;
+      });
+    if (!task) {
+      callback(new Error('task not found'), null);
+    }
+    const taskResponse = new Task();
+    taskResponse.setId(task.id);
+    taskResponse.setName(task.name);
+    taskResponse.setDescription(task.description);
+    const createdAt = new timestamp.Timestamp();
+    createdAt.setSeconds(task.createdAt?.seconds || 0);
+    createdAt.setNanos(task.createdAt?.nanos || 0);
+    const updatedAt = new timestamp.Timestamp();
+    updatedAt.setSeconds(task.updatedAt?.seconds || 0);
+    updatedAt.setNanos(task.updatedAt?.nanos || 0);
+    taskResponse.setCreatedAt(createdAt);
+    taskResponse.setUpdatedAt(updatedAt);
 
-//     const dbTasks = db.get('tasks') as any;
-//     const task = dbTasks.find({ id }).value();
-//     if (task) {
-//       dbTasks.remove({ id }).write();
-//       deleteTaskRespone.setSuccess(true);
-//       deleteTaskRespone.setMessage('Task deleted successfully');
-//     } else {
-//       deleteTaskRespone.setSuccess(false);
-//       deleteTaskRespone.setMessage('Task not found');
-//     }
-//     callback(null, deleteTaskRespone);
-//   }
-// }
+    callback(null, taskResponse);
+  }
+  listTasks(
+    call: grpc.ServerUnaryCall<ListTasksRequest, TasksResponse>,
+    callback: grpc.sendUnaryData<TasksResponse>
+  ): void {
+    const { accessToken } = call.request.toObject();
+    console.log(accessToken);
+    const userId = Object.keys(accessTokens).find(
+      (key) => accessTokens[key] == accessToken
+    );
+    if (!userId) {
+      callback(new Error('user not found'), null);
+    }
+    const tasksDb = db
+      .get('tasks')
+      .value()
+      .filter((task: Task.AsObject) => {
+        return task.userfk === parseInt(userId);
+      });
+    const tasksResponse = new TasksResponse();
+    tasksDb.forEach((task: Task.AsObject) => {
+      const taskResponse = new Task();
+      taskResponse.setId(task.id);
+      taskResponse.setName(task.name);
+      taskResponse.setUserfk(task.userfk);
+      taskResponse.setDescription(task.description);
+      const createdAt = new timestamp.Timestamp();
+      createdAt.setSeconds(task.createdAt?.seconds || 0);
+      createdAt.setNanos(task.createdAt?.nanos || 0);
+      const updatedAt = new timestamp.Timestamp();
+      updatedAt.setSeconds(task.updatedAt?.seconds || 0);
+      updatedAt.setNanos(task.updatedAt?.nanos || 0);
+      taskResponse.setCreatedAt(createdAt);
+      taskResponse.setUpdatedAt(updatedAt);
+      tasksResponse.addTasks(taskResponse);
+    });
+    callback(null, tasksResponse);
+  }
+  // List all Tasks
+  //   const tasks = db.get('tasks').value();
+  //   const tasksResponse = new TasksResponse();
+  //   tasks.forEach((task: Task.AsObject) => {
+  //     const taskResponse = new Task();
+  //     taskResponse.setId(task.id);
+  //     taskResponse.setName(task.name);
+  //     taskResponse.setDescription(task.description);
+  //     const createdAt = new timestamp.Timestamp();
+  //     createdAt.setSeconds(task.createdAt?.seconds || 0);
+  //     createdAt.setNanos(task.createdAt?.nanos || 0);
+  //     const updatedAt = new timestamp.Timestamp();
+  //     updatedAt.setSeconds(task.updatedAt?.seconds || 0);
+  //     updatedAt.setNanos(task.updatedAt?.nanos || 0);
+  //     taskResponse.setCreatedAt(createdAt);
+  //     taskResponse.setUpdatedAt(updatedAt);
+
+  //     tasksResponse.addTasks(taskResponse);
+  //   });
+  //   callback(null, tasksResponse);
+  // }
+
+  updateTask: grpc.handleUnaryCall<UpdateTaskRequest, Task>;
+  deleteTask: grpc.handleUnaryCall<DeleteTaskRequest, Empty>;
+}
 
 function serve(): void {
   const server = new grpc.Server();
+  addReflection(server, './src/proto/descriptor_set.bin');
   server.addService(AuthServiceService, new AuthServer());
+  server.addService(TaskServiceService, new TaskServer());
   // server.addService(TaskServiceService, new TasksServer());
   process.env.PORT = '8080';
   server.bindAsync(

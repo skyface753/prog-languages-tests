@@ -13,8 +13,11 @@ yarn run grpc_tools_node_protoc \
     --ts_out=grpc_js:${PROTO_DEST} \
     --js_out=import_style=commonjs,binary:${PROTO_DEST} \
     --grpc_out=grpc_js:${PROTO_DEST} \
+    --descriptor_set_out=${PROTO_DEST}/descriptor_set.bin \
+    --include_imports \
     -I ../proto \
     ../proto/*.proto
+
 
 # yarn run grpc_tools_node_protoc --plugin=protoc-gen-ts=./server/node_modules/.bin/protoc-gen-ts \
     # --ts_out=grpc_js:./server/src/proto \

@@ -23,22 +23,7 @@ db.defaults({
       lastLogin: new Date(),
     },
   ],
-
-  // tasks: [
-  //   {
-  //     id: 1,
-  //     title: 'Task 1',
-  //     description: 'Task 1 description',
-  //     createdAt: {
-  //       seconds: '1667464811',
-  //       nanos: 122000000,
-  //     },
-  //     updatedAt: {
-  //       seconds: '1667464811',
-  //       nanos: 122000000,
-  //     },
-  //   },
-  // ],
+  tasks: [],
 }).write();
 
 export default db;
