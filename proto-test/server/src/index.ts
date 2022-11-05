@@ -4,6 +4,7 @@ import { handleUnaryCall } from '@grpc/grpc-js';
 import { IAuthServiceServer, AuthServiceService } from './proto/auth_grpc_pb';
 import { ITaskServiceServer, TaskServiceService } from './proto/tasks_grpc_pb';
 import { addReflection } from 'grpc-server-reflection';
+// import * as grpcmiddleware from './grpc-middleware';
 
 // import {
 //   Task,
@@ -150,7 +151,44 @@ class AuthServer implements IAuthServiceServer {
       callback(new Error('user not found'), null);
     }
   }
+
+  static async validateAccessToken(accessToken: string, callback: any) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (accessToken === '123') {
+          resolve(true);
+        } else {
+          callback(new Error('invalid access token'), null);
+          // throw new Error('invalid access token');
+          // reject(false);
+        }
+      }, 1000);
+    });
+    // const userId = Object.keys(accessTokens).find(
+    //   (key) => accessTokens[key] === accessToken
+    // );
+    // if (userId) {
+    //   return true;
+    // }
+    // return false;
+  }
 }
+
+// async function testMiddleware(token: string, callback: any) {
+//   console.log('token', token);
+
+//   return new Promise<void>((resolve) => {
+//     setTimeout(() => {
+//       if (token !== '123') {
+//         // reject(new Error('invalid token'));
+//         callback(new Error('invalid token'));
+//       } else {
+//         console.log('token VALID', token);
+//         resolve();
+//       }
+//     }, 1000);
+//   });
+// }
 
 class TaskServer implements ITaskServiceServer {
   // listTasks: grpc.handleUnaryCall<Empty, TasksResponse>;
@@ -158,12 +196,21 @@ class TaskServer implements ITaskServiceServer {
   [name: string]: grpc.UntypedHandleCall;
 
   // createTask: grpc.handleUnaryCall<CreateTaskRequest, Task>;
-  createTask(
+  async createTask(
     call: grpc.ServerUnaryCall<CreateTaskRequest, Task>,
     callback: grpc.sendUnaryData<Task>
-  ): void {
+  ): Promise<void> {
     // Create a Task
     const { name, description, accessToken } = call.request.toObject();
+    // Middleware
+    await AuthServer.validateAccessToken(accessToken, callback);
+    // await testMiddleware(accessToken, callback);
+
+    // try {
+    //   await testMiddleware(accessToken);
+    // } catch (e) {
+    //   callback(e, null);
+    // }
     console.log(accessToken);
     const userId = Object.keys(accessTokens).find(
       (key) => accessTokens[key] === accessToken
@@ -281,12 +328,17 @@ class TaskServer implements ITaskServiceServer {
   deleteTask: grpc.handleUnaryCall<DeleteTaskRequest, Empty>;
 }
 
+function testMiddlewareGRPC() {
+  console.log('HALLO');
+}
+
 function serve(): void {
+  // const server = new mali();
   const server = new grpc.Server();
+  // const server = new grpcmiddleware.Server();
   addReflection(server, './src/proto/descriptor_set.bin');
   server.addService(AuthServiceService, new AuthServer());
   server.addService(TaskServiceService, new TaskServer());
-  // server.addService(TaskServiceService, new TasksServer());
   process.env.PORT = '8080';
   server.bindAsync(
     `localhost:${process.env.PORT}`,
