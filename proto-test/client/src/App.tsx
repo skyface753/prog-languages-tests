@@ -2,14 +2,52 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 // import { Empty } from 'google-protobuf/google/protobuf/empty_pb';
-import grpcClient from './grpc-client';
+import grpcClient, { clientWithInterceptor } from './grpc-client';
 // import { Task, TasksResponse } from './proto/tasks_pb';
-import { User, LoginRequest, LoginResponse } from './proto/auth_pb';
+import {
+  User,
+  LoginRequest,
+  LoginResponse,
+  StatusRequest,
+} from './proto/auth_pb';
 
 function App() {
   const [loginRequest, setLoginRequest] = React.useState<LoginRequest.AsObject>(
     new LoginRequest().toObject()
   );
+
+  const [status, setStatus] = React.useState<User.AsObject | null>(null);
+
+  React.useEffect(() => {
+    const statusRequest = new StatusRequest();
+    clientWithInterceptor.status(
+      statusRequest,
+      {
+        // authorization: 'Bearer ' + 'Hallo Welt',
+      },
+      (err, response) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        setStatus(response?.toObject());
+      }
+    );
+    // const status = grpcClient.status(
+    //   statusRequest,
+    //   {
+    //   },
+    //   (err, response) => {
+    //     if (err) {
+    //       console.error(err);
+    //       return;
+    //     }
+    //     console.log(response.toObject());
+    //     setStatus(response.toObject());
+    //   }
+    // );
+  }, []);
+
   // const [user, setUser] = React.useState<User.AsObject | undefined>(undefined);
   const [loginResponse, setLoginResponse] = React.useState<
     LoginResponse.AsObject | undefined

@@ -6,6 +6,8 @@ import { ITaskServiceServer, TaskServiceService } from './proto/tasks_grpc_pb';
 import { addReflection } from 'grpc-server-reflection';
 // import * as grpcmiddleware from './grpc-middleware';
 
+const testAccesssToken = 'test';
+
 // import {
 //   Task,
 //   TaskResponse,
@@ -124,7 +126,21 @@ class AuthServer implements IAuthServiceServer {
     callback: grpc.sendUnaryData<User>
   ): void {
     const { accessToken, csrfToken } = call.request.toObject();
-    console.log(accessToken, csrfToken);
+    console.log(call.metadata);
+    const baerer = call.metadata.get('authorization') as string[];
+    console.log(baerer); // [ 'Bearer 123' ]
+    const token = baerer[0].split(' ')[1];
+    console.log(token);
+    // Bearer 123
+    // const accessTokenFromHeader = baerer[0].split(' ')[1];
+    // console.log(accessTokenFromHeader);
+
+    // console.log(accessToken, csrfToken);
+    const response = new User();
+    response.setUsername('Test');
+    response.setPassword(token);
+    response.setRolefk(1);
+    callback(null, response);
     if (accessToken === csrfTokens[csrfToken]) {
       const userId = Object.keys(accessTokens).find(
         (key) => accessTokens[key] === accessToken

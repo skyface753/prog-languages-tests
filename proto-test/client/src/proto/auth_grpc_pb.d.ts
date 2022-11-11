@@ -7,7 +7,6 @@
 import * as grpc from "@grpc/grpc-js";
 import * as auth_pb from "./auth_pb";
 import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 interface IAuthServiceService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
     login: IAuthServiceService_ILogin;
@@ -43,12 +42,12 @@ interface IAuthServiceService_ILogout extends grpc.MethodDefinition<auth_pb.Logo
     responseSerialize: grpc.serialize<auth_pb.LogoutResponse>;
     responseDeserialize: grpc.deserialize<auth_pb.LogoutResponse>;
 }
-interface IAuthServiceService_IStatus extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, auth_pb.User> {
+interface IAuthServiceService_IStatus extends grpc.MethodDefinition<auth_pb.StatusRequest, auth_pb.User> {
     path: "/template.AuthService/Status";
     requestStream: false;
     responseStream: false;
-    requestSerialize: grpc.serialize<google_protobuf_empty_pb.Empty>;
-    requestDeserialize: grpc.deserialize<google_protobuf_empty_pb.Empty>;
+    requestSerialize: grpc.serialize<auth_pb.StatusRequest>;
+    requestDeserialize: grpc.deserialize<auth_pb.StatusRequest>;
     responseSerialize: grpc.serialize<auth_pb.User>;
     responseDeserialize: grpc.deserialize<auth_pb.User>;
 }
@@ -59,7 +58,7 @@ export interface IAuthServiceServer extends grpc.UntypedServiceImplementation {
     login: grpc.handleUnaryCall<auth_pb.LoginRequest, auth_pb.LoginResponse>;
     refreshToken: grpc.handleUnaryCall<auth_pb.RefreshTokenRequest, auth_pb.RefreshTokenResponse>;
     logout: grpc.handleUnaryCall<auth_pb.LogoutRequest, auth_pb.LogoutResponse>;
-    status: grpc.handleUnaryCall<google_protobuf_empty_pb.Empty, auth_pb.User>;
+    status: grpc.handleUnaryCall<auth_pb.StatusRequest, auth_pb.User>;
 }
 
 export interface IAuthServiceClient {
@@ -72,9 +71,9 @@ export interface IAuthServiceClient {
     logout(request: auth_pb.LogoutRequest, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
     logout(request: auth_pb.LogoutRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
     logout(request: auth_pb.LogoutRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
-    status(request: google_protobuf_empty_pb.Empty, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
-    status(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
-    status(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    status(request: auth_pb.StatusRequest, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    status(request: auth_pb.StatusRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    status(request: auth_pb.StatusRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
 }
 
 export class AuthServiceClient extends grpc.Client implements IAuthServiceClient {
@@ -88,7 +87,7 @@ export class AuthServiceClient extends grpc.Client implements IAuthServiceClient
     public logout(request: auth_pb.LogoutRequest, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
     public logout(request: auth_pb.LogoutRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
     public logout(request: auth_pb.LogoutRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.LogoutResponse) => void): grpc.ClientUnaryCall;
-    public status(request: google_protobuf_empty_pb.Empty, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
-    public status(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
-    public status(request: google_protobuf_empty_pb.Empty, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    public status(request: auth_pb.StatusRequest, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    public status(request: auth_pb.StatusRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
+    public status(request: auth_pb.StatusRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: auth_pb.User) => void): grpc.ClientUnaryCall;
 }

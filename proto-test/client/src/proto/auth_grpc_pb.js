@@ -4,18 +4,6 @@
 var grpc = require('@grpc/grpc-js');
 var auth_pb = require('./auth_pb.js');
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
-var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
-
-function serialize_google_protobuf_Empty(arg) {
-  if (!(arg instanceof google_protobuf_empty_pb.Empty)) {
-    throw new Error('Expected argument of type google.protobuf.Empty');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_google_protobuf_Empty(buffer_arg) {
-  return google_protobuf_empty_pb.Empty.deserializeBinary(new Uint8Array(buffer_arg));
-}
 
 function serialize_template_LoginRequest(arg) {
   if (!(arg instanceof auth_pb.LoginRequest)) {
@@ -83,6 +71,17 @@ function deserialize_template_RefreshTokenResponse(buffer_arg) {
   return auth_pb.RefreshTokenResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_template_StatusRequest(arg) {
+  if (!(arg instanceof auth_pb.StatusRequest)) {
+    throw new Error('Expected argument of type template.StatusRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_template_StatusRequest(buffer_arg) {
+  return auth_pb.StatusRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_template_User(arg) {
   if (!(arg instanceof auth_pb.User)) {
     throw new Error('Expected argument of type template.User');
@@ -133,10 +132,10 @@ var AuthServiceService = exports.AuthServiceService = {
     path: '/template.AuthService/Status',
     requestStream: false,
     responseStream: false,
-    requestType: google_protobuf_empty_pb.Empty,
+    requestType: auth_pb.StatusRequest,
     responseType: auth_pb.User,
-    requestSerialize: serialize_google_protobuf_Empty,
-    requestDeserialize: deserialize_google_protobuf_Empty,
+    requestSerialize: serialize_template_StatusRequest,
+    requestDeserialize: deserialize_template_StatusRequest,
     responseSerialize: serialize_template_User,
     responseDeserialize: deserialize_template_User,
   },

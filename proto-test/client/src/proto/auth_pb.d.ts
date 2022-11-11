@@ -6,7 +6,6 @@
 
 import * as jspb from "google-protobuf";
 import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
-import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 export class LoginRequest extends jspb.Message { 
     getUsername(): string;
@@ -190,5 +189,28 @@ export namespace User {
         avatar?: string,
         createdat?: google_protobuf_timestamp_pb.Timestamp.AsObject,
         lastlogin?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    }
+}
+
+export class StatusRequest extends jspb.Message { 
+    getAccessToken(): string;
+    setAccessToken(value: string): StatusRequest;
+    getCsrfToken(): string;
+    setCsrfToken(value: string): StatusRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): StatusRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: StatusRequest): StatusRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: StatusRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): StatusRequest;
+    static deserializeBinaryFromReader(message: StatusRequest, reader: jspb.BinaryReader): StatusRequest;
+}
+
+export namespace StatusRequest {
+    export type AsObject = {
+        accessToken: string,
+        csrfToken: string,
     }
 }

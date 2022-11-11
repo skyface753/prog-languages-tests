@@ -17,8 +17,6 @@ grpc.web = require('grpc-web');
 
 
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js')
-
-var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js')
 const proto = {};
 proto.template = require('./auth_pb.js');
 
@@ -260,16 +258,16 @@ proto.template.AuthServicePromiseClient.prototype.logout =
 /**
  * @const
  * @type {!grpc.web.MethodDescriptor<
- *   !proto.google.protobuf.Empty,
+ *   !proto.template.StatusRequest,
  *   !proto.template.User>}
  */
 const methodDescriptor_AuthService_Status = new grpc.web.MethodDescriptor(
   '/template.AuthService/Status',
   grpc.web.MethodType.UNARY,
-  google_protobuf_empty_pb.Empty,
+  proto.template.StatusRequest,
   proto.template.User,
   /**
-   * @param {!proto.google.protobuf.Empty} request
+   * @param {!proto.template.StatusRequest} request
    * @return {!Uint8Array}
    */
   function(request) {
@@ -280,7 +278,7 @@ const methodDescriptor_AuthService_Status = new grpc.web.MethodDescriptor(
 
 
 /**
- * @param {!proto.google.protobuf.Empty} request The
+ * @param {!proto.template.StatusRequest} request The
  *     request proto
  * @param {?Object<string, string>} metadata User defined
  *     call metadata
@@ -301,7 +299,7 @@ proto.template.AuthServiceClient.prototype.status =
 
 
 /**
- * @param {!proto.google.protobuf.Empty} request The
+ * @param {!proto.template.StatusRequest} request The
  *     request proto
  * @param {?Object<string, string>=} metadata User defined
  *     call metadata
